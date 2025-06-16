@@ -1,44 +1,51 @@
 # UFES_VWalker_IA_Server
-This repository contains the source code for the control server for a smart walker. The system uses an AI agent, built with LangChain and LangGraph and powered by a local language model via Ollama, to provide an intuitive and assistive navigation interface. The server acts as a bridge between user commands and the ROS 2 robotics ecosystem, and also provides audio feedback via a Text-to-Speech (TTS) service.
 
-##Architecture
-The system is designed around a Flask API that exposes endpoints for user interaction. The core logic is encapsulated in an AI agent that interprets the user’s intent and executes the appropriate tools to control the walker.
+Este repositório contém o código-fonte do servidor de controle para um andador inteligente. O sistema utiliza um agente de IA, construído com **LangChain** e **LangGraph** e alimentado por um modelo de linguagem local via **Ollama**, para oferecer uma interface de navegação intuitiva e assistiva. O servidor atua como uma ponte entre os comandos do usuário e o ecossistema robótico **ROS 2**, além de fornecer feedback em áudio por meio de um serviço de **Text-to-Speech (TTS)**.
 
-The interaction flow is as follows:
+---
 
-1. User Input: The user sends a text command (e.g., “Take me to the kitchen” or “I want to walk freely”).
-2. API Server (vwalker_server_API.py): Receives the HTTP request.
-3. AI Agent (ollama_functions.py): The agent, guided by a strict operational prompt (agent_prompt.py), processes the input to classify the intent:
+## Arquitetura
 
-. Assisted Navigation: The user wants to go to a specific location.
-. Free Navigation: The user wants to control the walker manually.
-. Training Mode: The user wants to learn how to use the walker.
+O sistema é estruturado em torno de uma API Flask que expõe endpoints para interação com o usuário. A lógica central está encapsulada em um agente de IA que interpreta a intenção do usuário e executa as ferramentas apropriadas para controlar o andador.
 
-5. Tool Execution (agent_tools.py): Based on the intent, the agent calls the appropriate tools, which are ROS 2 clients. These tools communicate with the walker nodes to:
+### Fluxo de Interação:
 
-.Enable/disable control modes.
-.Request Nav2 to calculate a route.
-.Load a predefined training path.
+1. **Comando do Usuário:** O usuário envia um comando de texto (ex: “Leve-me até a cozinha” ou “Quero andar livremente”).
+2. **Servidor API (`vwalker_server_API.py`):** Recebe a requisição HTTP.
+3. **Agente de IA (`ollama_functions.py`):** O agente, guiado por um prompt operacional rigoroso (`agent_prompt.py`), processa o input para classificar a intenção:
+   - Navegação Assistida
+   - Navegação Livre
+   - Modo de Treinamento
+4. **Execução das Ferramentas (`agent_tools.py`):** De acordo com a intenção, o agente chama as ferramentas adequadas (clientes ROS 2), que se comunicam com os nós do andador para:
+   - Habilitar/desabilitar modos de controle.
+   - Requisitar ao Nav2 o cálculo de uma rota.
+   - Carregar um caminho de treinamento pré-definido.
+5. **Resposta ao Usuário:** O agente gera uma resposta em texto.
+6. **Síntese de Voz (`tts.py`):** O servidor usa o modelo **Suno Bark** para converter a resposta em áudio, fornecendo feedback acessível.
+7. **Ação no Frontend:** O servidor pode enviar um `trigger_action` (ex: `OPEN_WINDOW`) para que a interface reaja dinamicamente (ex: abrir a tela de navegação).
 
-6. User Response: The agent generates a text response.
-7. Speech Synthesis (tts.py): The server uses the Suno Bark model to convert the agent's response into audio, providing clear and accessible feedback.
-8. Frontend Action: The server can send a trigger_action (e.g. OPEN_WINDOW) to the frontend, allowing the user interface to react dynamically (e.g. opening a navigation screen).
+---
 
-##Features
-1. Natural Language Processing: Understands user commands in natural language for easy interaction.
-2. Three Operation Modes:
-. Assisted Navigation: Guides the user to a specific destination by generating a path through Nav2.
-. Free Navigation: Allows the user to control the walker autonomously.
-. Training Mode: Loads a predefined path (lemniscate_medium_4x4.csv) so the user can practice using the walker.
-3. ROS 2 Integration: Interacts directly with ROS 2 services and actions for real-time robot control.
-4. Voice Feedback: Uses a high-quality TTS model to provide audible instructions and responses.
-5. Robust API: Flask-based API for easy integration with different types of user interfaces (web, mobile, etc.).
+##  Funcionalidades
 
-##Pré-requisites
+- **Processamento de Linguagem Natural:** Compreende comandos em linguagem natural para uma interação facilitada.
+- **Três Modos de Operação:**
+  - **Navegação Assistida:** Guia o usuário até um destino específico utilizando o Nav2.
+  - **Navegação Livre:** Permite que o usuário controle o andador manualmente.
+  - **Modo de Treinamento:** Carrega um trajeto de treino pré-definido (`lemniscate_medium_4x4.csv`) para que o usuário pratique.
+- **Integração com ROS 2:** Comunicação direta com serviços e ações do ROS 2 para controle robótico em tempo real.
+- **Feedback por Voz:** Utiliza um modelo TTS de alta qualidade para fornecer instruções e respostas audíveis.
+- **API Robusta:** Baseada em Flask, facilita a integração com diferentes interfaces de usuário (web, mobile, etc).
 
-Before you begin, make sure you have the following installed:
+---
 
-. Python 3.9 or higher.
-. ROS 2 Humble Hawksbill: The ROS 2 environment must be installed and configured.
-. Ollama: To run the language model locally. Installation instructions.
-. LLM Model: The code is configured to use qwen2.5:14b. Download it with:
+##  Pré-requisitos
+
+Antes de começar, certifique-se de que os seguintes itens estão instalados:
+
+- Python **3.9** ou superior  
+- **ROS 2 Humble Hawksbill**: Ambiente ROS 2 instalado e configurado  
+- **Ollama**: Para rodar o modelo de linguagem local ([instruções de instalação](https://ollama.com))  
+- **Modelo LLM**: O código está configurado para utilizar o `qwen2.5:14b`. Faça o download com:
+  ```bash
+  ollama run qwen2.5:14b
